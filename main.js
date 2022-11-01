@@ -1,17 +1,28 @@
-const { app, BrowserWindow } = require('electron')
+const { ipcMainManager } = import('./src/main/ipc')
+
+const { app, BrowserWindow ,Menu} = require('electron')
 const path = require('path')
+
+Menu.setApplicationMenu(null)
 
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 800, height: 600, webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
-        }
+        width: 1200,
+        height: 760,
+        webPreferences: {
+            nodeIntegration: true, // 是否集成 Nodejs
+            enableRemoteModule: true,
+            contextIsolation: false,
+            preload: path.join(__dirname, './src/main/preload.ts')
+        },
     })
 
-    win.loadFile('./render/html/index.html')
+    win.loadFile('./src/render/html/index.html')
 }
 
 app.whenReady().then(() => {
+    //分发render消息
+    ipcMainManager.handle()
     createWindow()
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
